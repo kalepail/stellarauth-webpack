@@ -9,7 +9,6 @@
 }
 .content {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
 
   button {
@@ -33,13 +32,18 @@
   }
   div {
     margin-right: 10px;
+    color: $gray;
   }
 
   @include breakpoint(500px) {
-    justify-content: center;
+    flex-direction: column;
 
     p, div {
-      margin-bottom: 10px;
+      display: block;
+      margin: 0 0 10px;
+    }
+    div {
+      font-size: 20px;
     }
   }
 }

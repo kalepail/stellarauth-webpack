@@ -153,7 +153,7 @@ export default {
         if ( // Accounts mismatched
           this.authIdTokenPayload &&
           this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub
-        ) return alert(`Authentication accounts mismatched\n${this.authIdTokenPayload.sub} vs. ${authResult.idTokenPayload.sub}`);
+        ) return alert(`Authentication accounts mismatched\nCurrent: ${this.authIdTokenPayload.sub}\nNew: ${authResult.idTokenPayload.sub}`);
 
         this.authIdToken = authResult.idToken;
         this.authAccessToken = authResult.accessToken;
