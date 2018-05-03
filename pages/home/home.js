@@ -212,7 +212,7 @@ export default {
     createAccount() {
       this.loading.push(1);
 
-      axios.post('create-stellar-account/test', null, {
+      axios.post(`create-stellar-account/${env.stellar.net}`, null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(() => this.checkAccountBalance())
@@ -223,7 +223,7 @@ export default {
     fundAccount() {
       this.loading.push(1);
 
-      axios.post('fund-stellar-account/test', null, {
+      axios.post(`fund-stellar-account/${env.stellar.net}`, null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(() => this.checkAccountBalance())
@@ -260,7 +260,7 @@ export default {
       })
       .then((transaction) => {
         const xdr = transaction.toEnvelope().toXDR().toString('base64');
-        return axios.post('sign-stellar-transaction/test', {xdr}, {
+        return axios.post(`sign-stellar-transaction/${env.stellar.net}`, {xdr}, {
           headers: {authorization: `Bearer ${this.signIdToken}`}
         });
       })
