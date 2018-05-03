@@ -247,17 +247,14 @@ export default {
 
       this.loading.push(1);
 
-      const publicKey = this.stellar.publicKey;
-      const destinationId = env.stellar.address;
-
-      server.loadAccount(destinationId)
-      .then(() => server.loadAccount(publicKey))
+      server.loadAccount(env.stellar.master_fee)
       .then((sourceAccount) => {
         return new StellarSdk.TransactionBuilder(sourceAccount)
         .addOperation(StellarSdk.Operation.payment({
-          destination: destinationId,
+          destination: env.stellar.master_fund,
           asset: StellarSdk.Asset.native(),
-          amount: '1'
+          amount: '1',
+          source: this.stellar.publicKey
         }))
         .build();
       })
