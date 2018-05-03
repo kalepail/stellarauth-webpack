@@ -108,7 +108,14 @@ export default {
           redirectUrl: location.origin,
           responseType: 'token id_token',
           params: {state}
-        }
+        },
+        theme: {
+          primaryColor: '#0000FF',
+          logo: 'https://d3vv6lp55qjaqc.cloudfront.net/items/191f0b3H3R1e0P421G42/stellar-rocket@2x.png'
+        },
+        languageDictionary: {
+          title: 'Stellar Auth Example'
+        },
       }
 
       if (state === 'sign')
@@ -144,8 +151,10 @@ export default {
       }
 
       else {
-        if (this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub) // Accounts mismatched
-          return alert(`Authentication accounts mismatched\n${this.authIdTokenPayload.sub} vs. ${authResult.idTokenPayload.sub}`);
+        if ( // Accounts mismatched
+          this.authIdTokenPayload &&
+          this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub
+        ) return alert(`Authentication accounts mismatched\n${this.authIdTokenPayload.sub} vs. ${authResult.idTokenPayload.sub}`);
 
         this.authIdToken = authResult.idToken;
         this.authAccessToken = authResult.accessToken;
