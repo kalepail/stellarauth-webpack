@@ -63,22 +63,17 @@ export default {
     }
   },
   mounted() {
-    this.lock = new Auth0LockPasswordless(
-      env.auth0.init,
-      env.auth0.domain
-    );
+    this.setAuth(false);
 
     if (this.authAccessToken)
       this.lock.getUserInfo(this.authAccessToken, (err, idTokenPayload) => {
         if (err) {
-          console.error(err);
-
           switch(err.status) {
             case 429:
             return this.logOut();
 
             default:
-            return;
+            return console.error(err);
           }
         }
 
@@ -87,8 +82,6 @@ export default {
 
         this.checkAccountBalance();
       });
-
-    this.lock.on('authenticated', this.lockAuthenticated);
   },
   methods: {
     logOut() {
@@ -100,7 +93,7 @@ export default {
       this.lock.logout({returnTo: location.origin});
     },
 
-    openAuth(state = 'auth') {
+    setAuth(open = true, state = 'auth') {
       const settings = {
         autoclose: true,
         passwordlessMethod: 'code',
@@ -111,11 +104,11 @@ export default {
         },
         theme: {
           primaryColor: '#0000FF',
-          logo: 'https://d3vv6lp55qjaqc.cloudfront.net/items/191f0b3H3R1e0P421G42/stellar-rocket@2x.png'
+          logo: env.auth0.logo
         },
         languageDictionary: {
           title: 'Stellar Auth Example'
-        },
+        }
       }
 
       if (state === 'sign')
@@ -133,13 +126,17 @@ export default {
         );
 
       this.lock.on('authenticated', this.lockAuthenticated);
-      this.lock.show();
+
+      if (open)
+        this.lock.show();
     },
 
     lockAuthenticated(authResult) {
       if (authResult.state === 'sign') {
-        if (!this.authIdTokenPayload.sub) // Not signed in
-          return this.logOut();
+        if ( // Not signed in or no Stellar account
+          !this.authIdTokenPayload.sub
+          || !this.stellar
+        ) return this.logOut();
 
         if (this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub) // Accounts mismatched
           return alert(`Authentication accounts mismatched\nAuth: ${this.authIdTokenPayload.sub}\nSign: ${authResult.idTokenPayload.sub}`);
@@ -183,7 +180,7 @@ export default {
         .catch((err) => console.error(err))
         .finally(() => {
           localStorage.removeItem('pendingMethod');
-          this.loading.splice(0, 1);
+          this.loading.pop();
         });
       }
 
@@ -207,7 +204,7 @@ export default {
         });
       })
       .catch((err) => this.handleWtError(err, 'setAccount'))
-      .finally(() => this.loading.splice(0, 1));
+      .finally(() => this.loading.pop());
     },
 
     createAccount() {
@@ -218,7 +215,7 @@ export default {
       })
       .then(() => this.checkAccountBalance())
       .catch((err) => this.handleWtError(err, 'createAccount'))
-      .finally(() => this.loading.splice(0, 1));
+      .finally(() => this.loading.pop());
     },
 
     fundAccount() {
@@ -229,7 +226,7 @@ export default {
       })
       .then(() => this.checkAccountBalance())
       .catch((err) => this.handleWtError(err, 'fundAccount'))
-      .finally(() => this.loading.splice(0, 1));
+      .finally(() => this.loading.pop());
     },
 
     handleWtError(err, method) {
@@ -238,7 +235,7 @@ export default {
       if (err.response.status === 401) {
         this.pendingMethod = method;
         localStorage.setItem('pendingMethod', method);
-        this.openAuth();
+        this.setAuth();
       }
     },
 
@@ -273,9 +270,9 @@ export default {
         console.error(err);
 
         if (err.response.status === 401)
-          this.openAuth('sign');
+          this.setAuth(true, 'sign');
       })
-      .finally(() => this.loading.splice(0, 1));
+      .finally(() => this.loading.pop());
     }
   }
 }

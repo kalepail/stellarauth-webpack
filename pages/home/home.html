@@ -1,6 +1,6 @@
 <div class="home">
   <div class="content">
-    <button @click="openAuth()" v-if="render === 'login'">Login</button>
+    <button @click="setAuth()" v-if="render === 'login'">Login</button>
     <button @click="logOut()" v-if="render !== 'login'">Logout</button>
 
     <button @click="createAccount()" v-if="render === 'fund'" :disabled="!!loading.length">Verify Account</button>
