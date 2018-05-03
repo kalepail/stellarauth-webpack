@@ -4,6 +4,7 @@ import axios from 'axios';
 import StellarSdk from 'stellar-sdk';
 import { getRandomBraille } from '../../js/braille';
 import env from '../../dev.json';
+import queryString from 'query-string';
 
 let server;
 
@@ -25,6 +26,7 @@ export default {
   data() {
     return {
       lock: null,
+      hash: queryString.parse(location.hash),
       account: null,
       authIdTokenPayload: JSON.parse(localStorage.getItem('authIdTokenPayload')),
       authAccessToken: localStorage.getItem('authAccessToken'),
@@ -63,7 +65,7 @@ export default {
     }
   },
   mounted() {
-    this.setAuth(false);
+    this.setAuth(false, this.hash.state);
 
     if (this.authAccessToken)
       this.lock.getUserInfo(this.authAccessToken, (err, idTokenPayload) => {
