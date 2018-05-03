@@ -1,0 +1,77 @@
+@charset "UTF-8";
+
+@import "../fonts/**/*.css";
+@import "./vamp/*.scss";
+@import "./vendor/*.scss";
+@import "../pages/**/*.scss";
+
+* {
+  box-sizing: border-box;
+}
+html, body {
+  font-size: 16px;
+}
+html {
+  text-size-adjust: none;
+}
+body {
+  font-family: $font-family;
+  color: $black;
+  font-weight: 400;
+  line-height: 1.5;
+}
+[v-cloak] {
+  display: none;
+}
+::-webkit-input-placeholder {
+  color: $gray;
+}
+::-moz-placeholder {
+  color: $gray;
+}
+:-ms-input-placeholder {
+  color: $gray;
+}
+:-moz-placeholder {
+  color: $gray;
+}
+button, input, textarea, select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  font-size: 16px;
+  font-family: $font-family;
+  outline: none;
+  border: none;
+  background: none;
+  color: $black;
+}
+button, input, textarea {
+  padding: 0;
+  margin: 0;
+}
+button,
+input[type="text"],
+input[type="tel"],
+input[type="number"],
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+button, .button {
+  cursor: pointer;
+  display: inline-flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+}
+a {
+  text-decoration: none;
+  color: $black;
+}
+strong {
+  font-weight: 700;
+}

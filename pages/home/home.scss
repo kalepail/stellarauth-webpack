@@ -1,0 +1,57 @@
+.home {
+  height: 100vh;
+  width: 100vw;
+  padding: 0 10px 10px;
+
+  @include breakpoint(500px) {
+    padding-top: 10px;
+  }
+}
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  button {
+    background-color: $blue;
+    color: $white;
+    padding: 0 20px;
+    height: 35px;
+    border-radius: $radius;
+    margin: 10px 10px 10px 0;
+
+    &:disabled {
+      background-color: $gray;
+      pointer-events: none;
+    }
+
+    @include breakpoint(500px) {
+      width: 100%;
+      margin-right: 0;
+      margin-top: 0;
+    }
+  }
+  div {
+    margin-right: 10px;
+  }
+
+  @include breakpoint(500px) {
+    justify-content: center;
+
+    p, div {
+      margin-bottom: 10px;
+    }
+  }
+}
+.key {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+div.key {
+  color: $gray;
+}
+a.key {
+  text-decoration: underline;
+}
