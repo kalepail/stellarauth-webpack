@@ -1,6 +1,6 @@
 <div class="authy-modal">
   <div class="modal-wrapper post-tfa" v-if="tfa">
-    <button @click="$emit('toggleAuthy')" class="modal-close plain" :disabled="disabled">Close</button>
+    <button @click="$emit('toggleAuthy')" class="modal-close plain" :disabled="disabled"></button>
 
     <div class="qr-actions">
       <img :src="qrCode" class="qr-code" v-if="qrCode">
@@ -21,7 +21,7 @@
   </div>
 
   <div class="modal-wrapper pre-tfa" v-else>
-    <button @click="$emit('toggleAuthy')" class="modal-close" :disabled="disabled">Close</button>
+    <button @click="$emit('toggleAuthy')" class="modal-close" :disabled="disabled"></button>
 
     <h1>Add 2FA to securely access your account</h1>
     <h2>Please provide a valid phone number and email address</h2>
@@ -35,8 +35,10 @@
           :selected="countryCode.code === defaultCountryCode"
         >{{countryCode.code}} | {{countryCode.name}}</option>
       </select>
-      <aside class="dial-code" v-if="country">{{country.dial_code | dialCode}}</aside>
-      <input type="text" class="input-phone" placeholder="Phone Number">
+      <div class="phone-wrapper">
+        <aside class="dial-code" v-if="country">{{country.dial_code | dialCode}}</aside>
+        <input type="text" class="input-phone" placeholder="Phone Number">
+      </div>
     </div>
 
     <div class="email-actions">
