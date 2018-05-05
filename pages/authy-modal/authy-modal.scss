@@ -33,6 +33,7 @@
   .loader {
     align-self: center;
     margin-top: 10px;
+    color: $gray;
   }
 }
 .modal-wrapper {
@@ -129,7 +130,7 @@
   }
   .button-sms {
     width: 100%;
-    background-color: $gray;
+    background-color: $black;
     color: $white;
     height: 35px;
     border-radius: $radius;

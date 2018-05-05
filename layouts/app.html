@@ -6,7 +6,7 @@
     <button @click="createAccount()" v-if="render === 'fund'" :disabled="disabled">Verify Account</button>
 
     <button @click="fundAccount()" v-if="render === 'normal'" :disabled="disabled">Add Funds</button>
-    <button @click="spendFunds()" v-if="render === 'normal'" :disabled="disabled">Spend Funds</button>
+    <button @click="toggleAuthy()" v-if="render === 'normal'" :disabled="disabled">Spend Funds</button>
 
     <div v-if="disabled" v-html="loader"></div>
 
@@ -22,12 +22,5 @@
     @toggleAuthy="toggleAuthy"
     @spendFunds="spendFunds"
     @handleWtError="handleWtError"
-    :lock="lock"
-    :authIdToken="authIdToken"
-    :authIdTokenPayload="authIdTokenPayload"
-    :loading="loading"
-    :loader="loader"
-    :disabled="disabled"
-    :signing="signing"
     ></authy-modal>
 </div>

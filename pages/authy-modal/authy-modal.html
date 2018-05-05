@@ -7,10 +7,10 @@
       <button class="qr-toggle plain" @click="generateAuthyQr()" v-else :disabled="disabled">Generate QR Code</button>
     </div>
 
-    <div class="code-actions">
+    <form class="code-actions" @submit="submitCode">
       <input type="text" class="input-code" placeholder="2FA Code" v-model="code">
-      <button class="button-verify" @click="$emit('spendFunds', code)" :disabled="disabled || !code">Submit Code</button>
-    </div>
+      <button class="button-verify" :disabled="disabled || !code">Submit Code</button>
+    </form>
 
     <div class="sms-actions">
       <aside class="or">or</aside>
@@ -32,6 +32,7 @@
           v-for="countryCode in countryCodes"
           :key="countryCode.code"
           :value="countryCode.code"
+          :selected="countryCode.code === defaultCountryCode"
         >{{countryCode.code}} | {{countryCode.name}}</option>
       </select>
       <aside class="dial-code" v-if="country">{{country.dial_code | dialCode}}</aside>

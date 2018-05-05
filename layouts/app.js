@@ -1,10 +1,11 @@
 import Vue from 'vue/dist/vue.esm';
 import App from './app.html';
-import { Auth0LockPasswordless } from 'auth0-lock';
 import axios from 'axios';
 import StellarSdk from 'stellar-sdk';
 import { getRandomBraille } from '../js/braille';
 import env from '../dev.json';
+import appStore from '../stores/app-store';
+import authyModalStore from '../stores/authy-modal-store';
 
 import $AuthyModal from '../pages/authy-modal/authy-modal';
 
@@ -26,49 +27,34 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 export default new Vue({
   el: 'app',
   template: App,
-  data: {
-    lock: null,
-    account: null,
-    authIdTokenPayload: JSON.parse(localStorage.getItem('authIdTokenPayload')),
-    authAccessToken: localStorage.getItem('authAccessToken'),
-    authIdToken: localStorage.getItem('authIdToken'),
-    signIdToken: localStorage.getItem('signIdToken'),
-    pendingMethod: localStorage.getItem('pendingMethod'),
-
-    loading: [],
-    loader: null,
-    interval: null,
-
-    signing: null,
-  },
   components: {
     'authy-modal': $AuthyModal
   },
   computed: {
-    render() {
-      if (this.account)
-        return 'normal';
+    lock: () => appStore.state.lock,
+    account: () => appStore.state.account,
+    authIdTokenPayload: () => appStore.state.authIdTokenPayload,
+    authAccessToken: () => appStore.state.authAccessToken,
+    authIdToken: () => appStore.state.authIdToken,
+    pendingMethod: () => appStore.state.pendingMethod,
+    loading: () => appStore.state.loading,
+    loader: () => appStore.state.loader,
+    interval: () => appStore.state.interval,
+    signing: () => appStore.state.signing,
 
-      else if (this.stellar)
-        return 'fund'
-
-      else
-        return 'login'
-    },
-    stellar() {
-      return this.authIdTokenPayload ? this.authIdTokenPayload[env.auth0.scope].stellar : null;
-    },
-    disabled() {
-      return !!this.loading.length;
-    }
+    render: () => appStore.getters.render,
+    stellar: () => appStore.getters.stellar,
+    authy: () => appStore.getters.authy,
+    disabled: () => appStore.getters.disabled,
   },
   watch: {
     loading() {
-      if (this.loading.length)
-        this.interval = this.interval || setInterval(() => this.loader = getRandomBraille(2), 100);
+      if (this.disabled) {
+        appStore.commit('setInterval', this.interval || setInterval(() => appStore.commit('setLoader', getRandomBraille(2)), 20));
+      }
       else {
         clearInterval(this.interval);
-        this.interval = null;
+        appStore.commit('setInterval', null);
       }
     }
   },
@@ -90,49 +76,28 @@ export default new Vue({
           }
         }
 
-        this.authIdTokenPayload = idTokenPayload;
-        localStorage.setItem('authIdTokenPayload', JSON.stringify(this.authIdTokenPayload));
+        appStore.commit('setAuthIdTokenPayload', idTokenPayload);
 
         this.checkAccountBalance();
       });
   },
   methods: {
     toggleAuthy() {
-      this.signing = !this.signing;
+      authyModalStore.commit('resetModal');
+      appStore.commit('toggleSigning');
     },
 
     logOut() {
       localStorage.removeItem('authAccessToken');
       localStorage.removeItem('authIdTokenPayload');
       localStorage.removeItem('authIdToken');
-      localStorage.removeItem('signIdToken');
       localStorage.removeItem('pendingMethod');
       localStorage.removeItem('tfa');
       this.lock.logout({returnTo: location.origin});
     },
 
     setAuth(open = true) {
-      const settings = {
-        autoclose: true,
-        passwordlessMethod: 'code',
-        auth: {
-          redirectUrl: location.origin,
-          responseType: 'token id_token'
-        },
-        theme: {
-          primaryColor: '#0000FF',
-          logo: env.auth0.logo
-        },
-        languageDictionary: {
-          title: 'Stellar Auth Example'
-        }
-      }
-
-      this.lock = new Auth0LockPasswordless(
-        env.auth0.auth,
-        env.auth0.domain,
-        settings
-      );
+      appStore.commit('setLock');
 
       this.lock.on('authenticated', this.lockAuthenticated);
 
@@ -146,12 +111,7 @@ export default new Vue({
         this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub
       ) return alert(`Authentication accounts mismatched\nCurrent: ${this.authIdTokenPayload.sub}\nNew: ${authResult.idTokenPayload.sub}`);
 
-      this.authIdToken = authResult.idToken;
-      this.authAccessToken = authResult.accessToken;
-      this.authIdTokenPayload = authResult.idTokenPayload;
-      localStorage.setItem('authIdToken', this.authIdToken);
-      localStorage.setItem('authAccessToken', this.authAccessToken);
-      localStorage.setItem('authIdTokenPayload', JSON.stringify(this.authIdTokenPayload));
+      appStore.commit('setAuthResult', authResult);
 
       if (this.pendingMethod)
         this[this.pendingMethod]();
@@ -168,12 +128,11 @@ export default new Vue({
         this.loading.push(1);
 
         server.loadAccount(this.stellar.publicKey)
-        .then((account) => this.account = account)
+        .then((account) => appStore.commit('setAccount', account))
         .catch((err) => console.error(err))
         .finally(() => {
           this.loading.pop();
-          this.pendingMethod = null;
-          localStorage.removeItem('pendingMethod');
+          appStore.commit('setPendingMethod', null);
         });
       }
 
@@ -226,8 +185,7 @@ export default new Vue({
       console.error(err);
 
       if (err.response.status === 401) {
-        this.pendingMethod = method;
-        localStorage.setItem('pendingMethod', method);
+        appStore.commit('setPendingMethod', method);
         this.setAuth();
       }
     },
