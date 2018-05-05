@@ -1,19 +1,13 @@
 import Authy from './authy-modal.html';
-import axios from 'axios';
 import { validate } from 'email-validator';
-import env from '../../dev.json';
 import appStore from '../../stores/app-store';
 import authyModalStore from '../../stores/authy-modal-store';
-
-axios.defaults.baseURL = env.wt;
-axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 export default {
   template: Authy,
   computed: {
     // State
       // authyModalStore
-      tfa: () => authyModalStore.state.tfa,
       qrCode: () => authyModalStore.state.qrCode,
       phone: () => authyModalStore.state.phone,
       email: {
@@ -30,6 +24,7 @@ export default {
       },
 
       // appStore
+      axios: () => appStore.state.axios,
       lock: () => appStore.state.lock,
       authIdToken: () => appStore.state.authIdToken,
       authIdTokenPayload: () => appStore.state.authIdTokenPayload,
@@ -44,6 +39,7 @@ export default {
 
       // appStore
       disabled: () => appStore.getters.disabled,
+      authy: () => appStore.getters.authy,
   },
   watch: {
     defaultCountryCode() {
@@ -54,18 +50,8 @@ export default {
         this.phone.setPhoneRegionCode(this.defaultCountryCode);
       }
     },
-    tfa() { // When tfa is changed check the cleave instance
-      authyModalStore.commit('setCleave');
-    },
-    signing() {
-      if (this.signing) {
-        if (this.authIdTokenPayload.email)
-          authyModalStore.commit('setEmail', this.authIdTokenPayload.email);
-
-        this.lookupPhoneNumber();
-
-        this.getAuthyAccount();
-      }
+    authy() { // When authy is changed check the cleave instance
+      authyModalStore.commit('updateCleave');
     }
   },
   filters: {
@@ -74,47 +60,16 @@ export default {
     }
   },
   mounted() {
-    authyModalStore.dispatch('getDefaultCountryCode')
-    .finally(() => authyModalStore.commit('setCleave'));
+
   },
   methods: {
-    lookupPhoneNumber() {
-      if (!this.authIdTokenPayload[env.auth0.scope].phone)
-        return;
-
-      axios.post('lookup-phone-number', {
-        number: this.authIdTokenPayload[env.auth0.scope].phone
-      }, {
-        headers: {authorization: `Bearer ${this.authIdToken}`}
-      })
-      .then(({data}) => {
-        this.phone.setRawValue(data.national_format);
-        this.phone.setPhoneRegionCode(data.country_code);
-      })
-      .catch((err) => console.error(err));
-    },
-
     focusPhone() {
       document.querySelector('.input-phone').focus();
     },
 
     submitCode(e) {
       e.preventDefault();
-      this.$emit('spendFunds', this.code);
-    },
-
-    getAuthyAccount() {
-      this.loading.push(1);
-
-      axios.post('get-authy-account', null, {
-        headers: {authorization: `Bearer ${this.authIdToken}`}
-      })
-      .then(({data}) => {
-        authyModalStore.commit('setTfa', data);
-        localStorage.setItem('tfa', JSON.stringify(this.tfa));
-      })
-      .catch((err) => this.$emit('handleWtError', err))
-      .finally(() => this.loading.pop());
+      appStore.dispatch('spendFunds', this.code);
     },
 
     setAuthyAccount() {
@@ -134,7 +89,7 @@ export default {
 
       this.loading.push(1);
 
-      axios.post('set-authy-account', {
+      this.axios.post('set-authy-account', {
         phone: {
           number: phone,
           code: this.country.code,
@@ -146,38 +101,35 @@ export default {
       })
       .then(() => {
         this.lock.checkSession({scope: 'openid profile email'}, (err, authResult) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
+          if (err)
+            return console.error(err);
 
-          this.$emit('lockAuthenticated', authResult);
-          this.getAuthyAccount();
+          appStore.commit('setAuthResult', authResult);
         });
       })
-      .catch((err) => this.$emit('handleWtError', err))
+      .catch((err) => appStore.dispatch('handleWtError', {err}))
       .finally(() => this.loading.pop());
     },
 
     generateAuthyQr() {
       this.loading.push(1);
 
-      axios.post('generate-authy-qr', null, {
+      this.axios.post('generate-authy-qr', null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data: {qr_code}}) => authyModalStore.commit('setQrCode', qr_code))
-      .catch((err) => this.$emit('handleWtError', err))
+      .catch((err) => appStore.dispatch('handleWtError', {err}))
       .finally(() => this.loading.pop());
     },
 
     sendAuthySMS() {
       this.loading.push(1);
 
-      axios.post('send-authy-sms', null, {
+      this.axios.post('send-authy-sms', null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data}) => console.log(data))
-      .catch((err) => this.$emit('handleWtError', err))
+      .catch((err) => appStore.dispatch('handleWtError', {err}))
       .finally(() => this.loading.pop());
     }
   }

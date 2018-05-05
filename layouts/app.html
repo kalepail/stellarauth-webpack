@@ -1,6 +1,6 @@
 <div class="app">
   <div class="content">
-    <button @click="setAuth()" v-if="render === 'login'">Login</button>
+    <button @click="setLock()" v-if="render === 'login'">Login</button>
     <button @click="logOut()" v-if="render !== 'login'">Logout</button>
 
     <button @click="createAccount()" v-if="render === 'fund'" :disabled="disabled">Verify Account</button>
@@ -18,9 +18,6 @@
 
   <authy-modal
     v-show="signing"
-    @lockAuthenticated="lockAuthenticated"
     @toggleAuthy="toggleAuthy"
-    @spendFunds="spendFunds"
-    @handleWtError="handleWtError"
     ></authy-modal>
 </div>

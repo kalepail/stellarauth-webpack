@@ -5,12 +5,13 @@ import axios from 'axios';
 import _ from 'lodash';
 import Cleave from 'cleave.js';
 import 'cleave.js/dist/addons/cleave-phone.i18n.js';
+import env from '../dev.json';
+import appStore from './app-store';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    tfa: JSON.parse(localStorage.getItem('tfa')),
     qrCode: null,
 
     phone: undefined,
@@ -18,6 +19,8 @@ export default new Vuex.Store({
     defaultCountryCode: 'US',
 
     code: null,
+
+    signing: null,
   },
   getters: {
     countryCodes() {
@@ -39,8 +42,8 @@ export default new Vuex.Store({
     setEmail(state, value) {
       state.email = value;
     },
-    setCleave(state) {
-      if (state.tfa) {
+    updateCleave(state) {
+      if (appStore.getters.authy) {
         if (state.phone)
           return state.phone.destroy();
         return;
@@ -52,29 +55,70 @@ export default new Vuex.Store({
       });
       state.phone.setRawValue();
     },
-    setTfa(state, value) {
-      state.tfa = value;
-    },
     setQrCode(state, value) {
       state.qrCode = value;
     },
     setCode(state, value) {
       state.code = value;
-    },
-    resetModal(state) {
-      if (state.phone)
-        state.phone.setRawValue();
-
-      state.email = null;
-      state.qrCode = null;
-      state.code = null;
     }
   },
   actions: {
+    toggleSigning({state, commit, dispatch}) {
+      if (state.signing) { // Close the signing modal
+        if (state.phone)
+          state.phone.setRawValue();
+
+        state.email = null;
+        state.qrCode = null;
+        state.code = null;
+
+        state.signing = false;
+      }
+
+      else { // Open the signing modal
+        commit('updateCleave');
+
+        if (!appStore.getters.authy) {
+          if (appStore.state.authIdTokenPayload.email)
+            commit('setEmail', appStore.state.authIdTokenPayload.email);
+
+          return dispatch('lookupPhoneNumber')
+          .finally(() => state.signing = true);
+        }
+
+        else
+          state.signing = true;
+      }
+    },
+
+    lookupPhoneNumber({state, dispatch}) {
+      if (
+        !state.phone
+        || !appStore.state.authIdTokenPayload[env.auth0.scope].phone
+      ) return dispatch('getDefaultCountryCode');
+
+      appStore.state.loading.push(1);
+
+      return appStore.state.axios.post('lookup-phone-number', {
+        number: appStore.state.authIdTokenPayload[env.auth0.scope].phone
+      }, {
+        headers: {authorization: `Bearer ${appStore.state.authIdToken}`}
+      })
+      .then(({data}) => {
+        state.phone.setRawValue(data.national_format);
+        state.phone.setPhoneRegionCode(data.country_code);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => appStore.state.loading.pop());
+    },
+
     getDefaultCountryCode({commit}) {
+      appStore.state.loading.push(1);
+
       return axios.get('https://api.ipdata.co')
       .then(({data}) => commit('setDefaultCountryCode', data.country_code))
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => appStore.state.loading.pop());
     }
   }
-})
+});
