@@ -21,15 +21,15 @@ export default new Vuex.Store({
     signing: null,
   },
   getters: {
-    render(state) {
+    render(state, getters) {
       if (state.account)
         return 'normal';
 
-      else if (state.stellar)
-        return 'fund'
+      else if (getters.stellar)
+        return 'fund';
 
       else
-        return 'login'
+        return 'login';
     },
     stellar(state) {
       return state.authIdTokenPayload ? state.authIdTokenPayload[env.auth0.scope].stellar : null;
@@ -59,6 +59,7 @@ export default new Vuex.Store({
       const settings = {
         autoclose: true,
         passwordlessMethod: 'code',
+        // allowedConnections: ['sms'],
         auth: {
           redirectUrl: location.origin,
           responseType: 'token id_token'

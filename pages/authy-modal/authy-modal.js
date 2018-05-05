@@ -58,8 +58,14 @@ export default {
       authyModalStore.commit('setCleave');
     },
     signing() {
-      if (this.signing)
+      if (this.signing) {
+        if (this.authIdTokenPayload.email)
+          authyModalStore.commit('setEmail', this.authIdTokenPayload.email);
+
+        this.lookupPhoneNumber();
+
         this.getAuthyAccount();
+      }
     }
   },
   filters: {
@@ -69,9 +75,25 @@ export default {
   },
   mounted() {
     authyModalStore.dispatch('getDefaultCountryCode')
-    .finally(() =>authyModalStore.commit('setCleave'));
+    .finally(() => authyModalStore.commit('setCleave'));
   },
   methods: {
+    lookupPhoneNumber() {
+      if (!this.authIdTokenPayload[env.auth0.scope].phone)
+        return;
+
+      axios.post('lookup-phone-number', {
+        number: this.authIdTokenPayload[env.auth0.scope].phone
+      }, {
+        headers: {authorization: `Bearer ${this.authIdToken}`}
+      })
+      .then(({data}) => {
+        this.phone.setRawValue(data.national_format);
+        this.phone.setPhoneRegionCode(data.country_code);
+      })
+      .catch((err) => console.error(err));
+    },
+
     focusPhone() {
       document.querySelector('.input-phone').focus();
     },
