@@ -18,7 +18,8 @@ export default {
     'authIdTokenPayload',
     'loading',
     'loader',
-    'disabled'
+    'disabled',
+    'signing'
   ],
   data() {
     return {
@@ -90,11 +91,25 @@ export default {
     setDefaultCountryCode() {
       axios.get('https://api.ipdata.co')
       .then(({data}) => this.defaultCountryCode = data.country_code)
-      .catch((err) => console.error(err));
+      .catch((err) => this.$emit('handleWtError', err));
     },
 
     focusPhone() {
       document.querySelector('.input-phone').focus();
+    },
+
+    getAuthyAccount() {
+      this.loading.push(1);
+
+      axios.post('get-authy-account', null, {
+        headers: {authorization: `Bearer ${this.authIdToken}`}
+      })
+      .then(({data}) => {
+        this.tfa = data;
+        localStorage.setItem('tfa', JSON.stringify(this.tfa));
+      })
+      .catch((err) => this.$emit('handleWtError', err))
+      .finally(() => this.loading.pop());
     },
 
     setAuthyAccount() {
@@ -135,21 +150,7 @@ export default {
           this.getAuthyAccount();
         });
       })
-      .catch((err) => console.error(err))
-      .finally(() => this.loading.pop());
-    },
-
-    getAuthyAccount() {
-      this.loading.push(1);
-
-      axios.post('get-authy-account', null, {
-        headers: {authorization: `Bearer ${this.authIdToken}`}
-      })
-      .then(({data}) => {
-        this.tfa = data;
-        localStorage.setItem('tfa', JSON.stringify(this.tfa));
-      })
-      .catch((err) => console.error(err))
+      .catch((err) => this.$emit('handleWtError', err))
       .finally(() => this.loading.pop());
     },
 
@@ -160,7 +161,7 @@ export default {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data: {qr_code}}) => this.qrCode = qr_code)
-      .catch((err) => console.error(err))
+      .catch((err) => this.$emit('handleWtError', err))
       .finally(() => this.loading.pop());
     },
 
@@ -171,7 +172,7 @@ export default {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data}) => console.log(data))
-      .catch((err) => console.error(err))
+      .catch((err) => this.$emit('handleWtError', err))
       .finally(() => this.loading.pop());
     }
   }

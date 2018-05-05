@@ -21,11 +21,13 @@
     @lockAuthenticated="lockAuthenticated"
     @toggleAuthy="toggleAuthy"
     @spendFunds="spendFunds"
+    @handleWtError="handleWtError"
     :lock="lock"
     :authIdToken="authIdToken"
     :authIdTokenPayload="authIdTokenPayload"
     :loading="loading"
     :loader="loader"
     :disabled="disabled"
+    :signing="signing"
     ></authy-modal>
 </div>
