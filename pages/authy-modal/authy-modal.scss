@@ -9,6 +9,15 @@
   height: 100vh;
   background-color: rgba($black, 0.5);
 
+  h1 {
+    font-size: 18px;
+  }
+  h2 {
+    color: $gray;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
   button:not(.plain):disabled {
     background-color: $gray;
     pointer-events: none;

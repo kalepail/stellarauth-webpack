@@ -8,7 +8,7 @@
     </div>
 
     <div class="code-actions">
-      <input type="text" class="input-code" placeholder="Code" v-model="code">
+      <input type="text" class="input-code" placeholder="2FA Code" v-model="code">
       <button class="button-verify" @click="$emit('spendFunds', code)" :disabled="disabled || !code">Submit Code</button>
     </div>
 
@@ -22,6 +22,9 @@
 
   <div class="modal-wrapper pre-tfa" v-else>
     <button @click="$emit('toggleAuthy')" class="modal-close" :disabled="disabled">Close</button>
+
+    <h1>Add 2FA to securely access your account</h1>
+    <h2>Please provide a valid phone number and email address</h2>
 
     <div class="phone-actions">
       <select class="select-country-code" v-model="defaultCountryCode" @change="focusPhone()">

@@ -67,11 +67,9 @@ export default {
     }
   },
   mounted() {
+    this.getAuthyAccount();
     this.setDefaultCountryCode();
     this.setCleave();
-
-    if (this.authy)
-      this.getAuthyAccount();
   },
   methods: {
     setCleave() {
@@ -134,8 +132,7 @@ export default {
           }
 
           this.$emit('lockAuthenticated', authResult);
-
-          this.$nextTick(() => this.getAuthyAccount());
+          this.getAuthyAccount();
         });
       })
       .catch((err) => console.error(err))
@@ -145,9 +142,7 @@ export default {
     getAuthyAccount() {
       this.loading.push(1);
 
-      axios.post('get-authy-account', {
-        authy: this.authy
-      }, {
+      axios.post('get-authy-account', null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data}) => {
@@ -161,14 +156,10 @@ export default {
     generateAuthyQr() {
       this.loading.push(1);
 
-      axios.post('generate-authy-qr', {
-        authy: this.authy
-      }, {
+      axios.post('generate-authy-qr', null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
-      .then(({data: {qr_code}}) => {
-        this.qrCode = qr_code;
-      })
+      .then(({data: {qr_code}}) => this.qrCode = qr_code)
       .catch((err) => console.error(err))
       .finally(() => this.loading.pop());
     },
@@ -176,14 +167,10 @@ export default {
     sendAuthySMS() {
       this.loading.push(1);
 
-      axios.post('send-authy-sms', {
-        authy: this.authy
-      }, {
+      axios.post('send-authy-sms', null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
-      .then(({data}) => {
-        console.log(data);
-      })
+      .then(({data}) => console.log(data))
       .catch((err) => console.error(err))
       .finally(() => this.loading.pop());
     }

@@ -17,7 +17,7 @@
   <a class="key" :href="'https://stellar.expert/explorer/testnet/account/'+ stellar.publicKey" target="_blank" v-if="render === 'normal'">{{stellar.publicKey}}</a>
 
   <authy-modal
-    v-if="signing"
+    v-show="signing"
     @lockAuthenticated="lockAuthenticated"
     @toggleAuthy="toggleAuthy"
     @spendFunds="spendFunds"

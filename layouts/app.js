@@ -261,7 +261,7 @@ export default new Vue({
       })
       .then(() => {
         this.toggleAuthy();
-        this.checkAccountBalance();
+        return this.checkAccountBalance();
       })
       .catch((err) => this.handleWtError(err, 'spendFunds'))
       .finally(() => this.loading.pop());
