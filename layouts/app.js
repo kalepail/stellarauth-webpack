@@ -1,10 +1,12 @@
-import Home from './home.html';
+import Vue from 'vue/dist/vue.esm';
+import App from './app.html';
 import { Auth0LockPasswordless } from 'auth0-lock';
 import axios from 'axios';
 import StellarSdk from 'stellar-sdk';
-import { getRandomBraille } from '../../js/braille';
-import env from '../../dev.json';
-import queryString from 'query-string';
+import { getRandomBraille } from '../js/braille';
+import env from '../dev.json';
+
+import $AuthyModal from '../pages/authy-modal/authy-modal';
 
 let server;
 
@@ -21,23 +23,26 @@ else {
 axios.defaults.baseURL = env.wt;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
-export default {
-  template: Home,
-  data() {
-    return {
-      lock: null,
-      hash: queryString.parse(location.hash),
-      account: null,
-      authIdTokenPayload: JSON.parse(localStorage.getItem('authIdTokenPayload')),
-      authAccessToken: localStorage.getItem('authAccessToken'),
-      authIdToken: localStorage.getItem('authIdToken'),
-      signIdToken: localStorage.getItem('signIdToken'),
-      pendingMethod: localStorage.getItem('pendingMethod'),
+export default new Vue({
+  el: 'app',
+  template: App,
+  data: {
+    lock: null,
+    account: null,
+    authIdTokenPayload: JSON.parse(localStorage.getItem('authIdTokenPayload')),
+    authAccessToken: localStorage.getItem('authAccessToken'),
+    authIdToken: localStorage.getItem('authIdToken'),
+    signIdToken: localStorage.getItem('signIdToken'),
+    pendingMethod: localStorage.getItem('pendingMethod'),
 
-      loading: [],
-      loader: null,
-      interval: null
-    }
+    loading: [],
+    loader: null,
+    interval: null,
+
+    signing: null,
+  },
+  components: {
+    'authy-modal': $AuthyModal
   },
   computed: {
     render() {
@@ -52,6 +57,9 @@ export default {
     },
     stellar() {
       return this.authIdTokenPayload ? this.authIdTokenPayload[env.auth0.scope].stellar : null;
+    },
+    disabled() {
+      return !!this.loading.length;
     }
   },
   watch: {
@@ -65,7 +73,10 @@ export default {
     }
   },
   mounted() {
-    this.setAuth(false, this.hash.state);
+    // this.toggleAuthy();
+    // this.loading.push(1);
+
+    this.setAuth(false);
 
     if (this.authAccessToken)
       this.lock.getUserInfo(this.authAccessToken, (err, idTokenPayload) => {
@@ -86,23 +97,27 @@ export default {
       });
   },
   methods: {
+    toggleAuthy() {
+      this.signing = !this.signing;
+    },
+
     logOut() {
       localStorage.removeItem('authAccessToken');
       localStorage.removeItem('authIdTokenPayload');
       localStorage.removeItem('authIdToken');
       localStorage.removeItem('signIdToken');
       localStorage.removeItem('pendingMethod');
+      localStorage.removeItem('tfa');
       this.lock.logout({returnTo: location.origin});
     },
 
-    setAuth(open = true, state = 'auth') {
+    setAuth(open = true) {
       const settings = {
         autoclose: true,
         passwordlessMethod: 'code',
         auth: {
           redirectUrl: location.origin,
-          responseType: 'token id_token',
-          params: {state}
+          responseType: 'token id_token'
         },
         theme: {
           primaryColor: '#0000FF',
@@ -113,19 +128,11 @@ export default {
         }
       }
 
-      if (state === 'sign')
-        this.lock = new Auth0LockPasswordless(
-          env.auth0.sign,
-          env.auth0.domain,
-          settings
-        );
-
-      else
-        this.lock = new Auth0LockPasswordless(
-          env.auth0.auth,
-          env.auth0.domain,
-          settings
-        );
+      this.lock = new Auth0LockPasswordless(
+        env.auth0.auth,
+        env.auth0.domain,
+        settings
+      );
 
       this.lock.on('authenticated', this.lockAuthenticated);
 
@@ -134,43 +141,26 @@ export default {
     },
 
     lockAuthenticated(authResult) {
-      if (authResult.state === 'sign') {
-        if ( // Not signed in or no Stellar account
-          !this.authIdTokenPayload.sub
-          || !this.stellar
-        ) return this.logOut();
+      if ( // Accounts mismatched
+        this.authIdTokenPayload &&
+        this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub
+      ) return alert(`Authentication accounts mismatched\nCurrent: ${this.authIdTokenPayload.sub}\nNew: ${authResult.idTokenPayload.sub}`);
 
-        if (this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub) // Accounts mismatched
-          return alert(`Authentication accounts mismatched\nAuth: ${this.authIdTokenPayload.sub}\nSign: ${authResult.idTokenPayload.sub}`);
+      this.authIdToken = authResult.idToken;
+      this.authAccessToken = authResult.accessToken;
+      this.authIdTokenPayload = authResult.idTokenPayload;
+      localStorage.setItem('authIdToken', this.authIdToken);
+      localStorage.setItem('authAccessToken', this.authAccessToken);
+      localStorage.setItem('authIdTokenPayload', JSON.stringify(this.authIdTokenPayload));
 
-        this.signIdToken = authResult.idToken;
-        localStorage.setItem('signIdToken', authResult.idToken);
+      if (this.pendingMethod)
+        this[this.pendingMethod]();
 
-        this.spendFunds();
-      }
+      else if (!this.stellar)
+        this.setAccount();
 
-      else {
-        if ( // Accounts mismatched
-          this.authIdTokenPayload &&
-          this.authIdTokenPayload.sub !== authResult.idTokenPayload.sub
-        ) return alert(`Authentication accounts mismatched\nCurrent: ${this.authIdTokenPayload.sub}\nNew: ${authResult.idTokenPayload.sub}`);
-
-        this.authIdToken = authResult.idToken;
-        this.authAccessToken = authResult.accessToken;
-        this.authIdTokenPayload = authResult.idTokenPayload;
-        localStorage.setItem('authIdToken', this.authIdToken);
-        localStorage.setItem('authAccessToken', this.authAccessToken);
-        localStorage.setItem('authIdTokenPayload', JSON.stringify(this.authIdTokenPayload));
-
-        if (this.pendingMethod)
-          this[this.pendingMethod]();
-
-        else if (!this.stellar)
-          this.setAccount();
-
-        else
-          this.checkAccountBalance();
-      }
+      else
+        this.checkAccountBalance();
     },
 
     checkAccountBalance() {
@@ -181,8 +171,9 @@ export default {
         .then((account) => this.account = account)
         .catch((err) => console.error(err))
         .finally(() => {
-          localStorage.removeItem('pendingMethod');
           this.loading.pop();
+          this.pendingMethod = null;
+          localStorage.removeItem('pendingMethod');
         });
       }
 
@@ -241,9 +232,12 @@ export default {
       }
     },
 
-    spendFunds() {
+    spendFunds(code) {
       if (!this.stellar)
         return;
+
+      if (!code)
+        return this.toggleAuthy();
 
       this.loading.push(1);
 
@@ -260,18 +254,17 @@ export default {
       })
       .then((transaction) => {
         const xdr = transaction.toEnvelope().toXDR().toString('base64');
-        return axios.post(`sign-stellar-transaction/${env.stellar.net}`, {xdr}, {
-          headers: {authorization: `Bearer ${this.signIdToken}`}
+
+        return axios.post(`sign-stellar-transaction/${env.stellar.net}`, {xdr, code}, {
+          headers: {authorization: `Bearer ${this.authIdToken}`}
         });
       })
-      .then(() => this.checkAccountBalance())
-      .catch((err) => {
-        console.error(err);
-
-        if (err.response.status === 401)
-          this.setAuth(true, 'sign');
+      .then(() => {
+        this.toggleAuthy();
+        this.checkAccountBalance();
       })
+      .catch((err) => this.handleWtError(err, 'spendFunds'))
       .finally(() => this.loading.pop());
     }
   }
-}
+});

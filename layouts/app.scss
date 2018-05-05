@@ -1,4 +1,4 @@
-.home {
+.app {
   height: 100vh;
   width: 100vw;
   padding: 0 10px 10px;
@@ -52,6 +52,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-bottom: 10px;
 }
 div.key {
   color: $gray;

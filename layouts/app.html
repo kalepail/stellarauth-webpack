@@ -1,3 +1,31 @@
 <div class="app">
-  <see-home></see-home>
+  <div class="content">
+    <button @click="setAuth()" v-if="render === 'login'">Login</button>
+    <button @click="logOut()" v-if="render !== 'login'">Logout</button>
+
+    <button @click="createAccount()" v-if="render === 'fund'" :disabled="disabled">Verify Account</button>
+
+    <button @click="fundAccount()" v-if="render === 'normal'" :disabled="disabled">Add Funds</button>
+    <button @click="spendFunds()" v-if="render === 'normal'" :disabled="disabled">Spend Funds</button>
+
+    <div v-if="disabled" v-html="loader"></div>
+
+    <p v-if="render === 'normal'">{{account.balances[0].balance}} XLM</p>
+  </div>
+
+  <div class="key" v-if="render === 'fund'">{{stellar.publicKey}}</div>
+  <a class="key" :href="'https://stellar.expert/explorer/testnet/account/'+ stellar.publicKey" target="_blank" v-if="render === 'normal'">{{stellar.publicKey}}</a>
+
+  <authy-modal
+    v-if="signing"
+    @lockAuthenticated="lockAuthenticated"
+    @toggleAuthy="toggleAuthy"
+    @spendFunds="spendFunds"
+    :lock="lock"
+    :authIdToken="authIdToken"
+    :authIdTokenPayload="authIdTokenPayload"
+    :loading="loading"
+    :loader="loader"
+    :disabled="disabled"
+    ></authy-modal>
 </div>
