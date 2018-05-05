@@ -42,7 +42,7 @@ export default new Vuex.Store({
     setEmail(state, value) {
       state.email = value;
     },
-    updateCleave(state) {
+    updatePhone(state) {
       if (appStore.getters.authy) {
         if (state.phone)
           return state.phone.destroy();
@@ -76,7 +76,7 @@ export default new Vuex.Store({
       }
 
       else { // Open the signing modal
-        commit('updateCleave');
+        commit('updatePhone');
 
         if (!appStore.getters.authy) {
           if (appStore.state.authIdTokenPayload.email)

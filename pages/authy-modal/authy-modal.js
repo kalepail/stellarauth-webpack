@@ -49,9 +49,6 @@ export default {
         this.phone.setRawValue(dial_code[1]);
         this.phone.setPhoneRegionCode(this.defaultCountryCode);
       }
-    },
-    authy() { // When authy is changed check the cleave instance
-      authyModalStore.commit('updateCleave');
     }
   },
   filters: {
@@ -105,6 +102,7 @@ export default {
             return console.error(err);
 
           appStore.commit('setAuthResult', authResult);
+          authyModalStore.commit('updatePhone');
         });
       })
       .catch((err) => appStore.dispatch('handleWtError', {err}))
