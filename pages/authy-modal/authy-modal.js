@@ -66,7 +66,7 @@ export default {
 
     submitCode(e) {
       e.preventDefault();
-      appStore.dispatch('spendFunds', this.code);
+      appStore.dispatch('spendFunds');
     },
 
     setAuthyAccount() {
@@ -105,7 +105,7 @@ export default {
           authyModalStore.commit('updatePhone');
         });
       })
-      .catch((err) => appStore.dispatch('handleWtError', {err}))
+      .catch((err) => appStore.dispatch('handleWtError', {err, method: 'toggleSigning'}))
       .finally(() => this.loading.pop());
     },
 
@@ -116,7 +116,7 @@ export default {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data: {qr_code}}) => authyModalStore.commit('setQrCode', qr_code))
-      .catch((err) => appStore.dispatch('handleWtError', {err}))
+      .catch((err) => appStore.dispatch('handleWtError', {err, method: 'toggleSigning'}))
       .finally(() => this.loading.pop());
     },
 
@@ -127,7 +127,7 @@ export default {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data}) => console.log(data))
-      .catch((err) => appStore.dispatch('handleWtError', {err}))
+      .catch((err) => appStore.dispatch('handleWtError', {err, method: 'toggleSigning'}))
       .finally(() => this.loading.pop());
     }
   }

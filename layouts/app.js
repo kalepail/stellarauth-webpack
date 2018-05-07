@@ -84,10 +84,10 @@ export default new Vue({
     },
 
     logOut() {
-      localStorage.removeItem('authAccessToken');
-      localStorage.removeItem('authIdTokenPayload');
-      localStorage.removeItem('authIdToken');
-      localStorage.removeItem('pendingMethod');
+      sessionStorage.removeItem('authAccessToken');
+      sessionStorage.removeItem('authIdTokenPayload');
+      sessionStorage.removeItem('authIdToken');
+      sessionStorage.removeItem('pendingMethod');
       this.lock.logout({returnTo: location.origin});
     }
   }

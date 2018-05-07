@@ -28,10 +28,10 @@ export default new Vuex.Store({
     }),
     lock: null,
     account: null,
-    authIdTokenPayload: JSON.parse(localStorage.getItem('authIdTokenPayload')),
-    authAccessToken: localStorage.getItem('authAccessToken'),
-    authIdToken: localStorage.getItem('authIdToken'),
-    pendingMethod: localStorage.getItem('pendingMethod'),
+    authIdTokenPayload: JSON.parse(sessionStorage.getItem('authIdTokenPayload')),
+    authAccessToken: sessionStorage.getItem('authAccessToken'),
+    authIdToken: sessionStorage.getItem('authIdToken'),
+    pendingMethod: sessionStorage.getItem('pendingMethod'),
 
     loading: [],
     loader: null,
@@ -67,15 +67,15 @@ export default new Vuex.Store({
     },
     setAuthIdTokenPayload(state, value) {
       state.authIdTokenPayload = value;
-      localStorage.setItem('authIdTokenPayload', JSON.stringify(value));
+      sessionStorage.setItem('authIdTokenPayload', JSON.stringify(value));
     },
     setAuthResult(state, value) {
       state.authIdToken = value.idToken;
       state.authAccessToken = value.accessToken;
       state.authIdTokenPayload = value.idTokenPayload;
-      localStorage.setItem('authIdToken', value.idToken);
-      localStorage.setItem('authAccessToken', value.accessToken);
-      localStorage.setItem('authIdTokenPayload', JSON.stringify(value.idTokenPayload));
+      sessionStorage.setItem('authIdToken', value.idToken);
+      sessionStorage.setItem('authAccessToken', value.accessToken);
+      sessionStorage.setItem('authIdTokenPayload', JSON.stringify(value.idTokenPayload));
     },
     setAccount(state, value) {
       state.account = value;
@@ -84,9 +84,9 @@ export default new Vuex.Store({
       state.pendingMethod = value;
 
       if (value)
-        localStorage.setItem('pendingMethod', value);
+        sessionStorage.setItem('pendingMethod', value);
       else
-        localStorage.removeItem('pendingMethod');
+        sessionStorage.removeItem('pendingMethod');
     }
   },
   actions: {
@@ -137,8 +137,18 @@ export default new Vuex.Store({
 
       commit('setAuthResult', authResult);
 
-      if (state.pendingMethod)
-        dispatch(state.pendingMethod);
+      if (state.pendingMethod) {
+        switch(state.pendingMethod) {
+          case 'toggleSigning':
+          authyModalStore.dispatch('toggleSigning');
+          break;
+
+          default:
+          dispatch(state.pendingMethod);
+        }
+
+        commit('setPendingMethod', null);
+      }
 
       else if (!getters.stellar)
         dispatch('setAccount');
@@ -154,10 +164,7 @@ export default new Vuex.Store({
         server.loadAccount(getters.stellar.publicKey)
         .then((account) => commit('setAccount', account))
         .catch((err) => console.error(err))
-        .finally(() => {
-          state.loading.pop();
-          commit('setPendingMethod', null);
-        });
+        .finally(() => state.loading.pop());
       }
     },
 
@@ -201,11 +208,11 @@ export default new Vuex.Store({
       .finally(() => state.loading.pop());
     },
 
-    spendFunds({state, dispatch, getters}, code) {
+    spendFunds({state, dispatch, getters}) {
       if (!getters.stellar)
         return;
 
-      if (!code)
+      if (!authyModalStore.state.code)
         return authyModalStore.dispatch('toggleSigning');
 
       state.loading.push(1);
@@ -224,7 +231,7 @@ export default new Vuex.Store({
       .then((transaction) => {
         const xdr = transaction.toEnvelope().toXDR().toString('base64');
 
-        return state.axios.post(`sign-stellar-transaction/${env.stellar.net}`, {xdr, code}, {
+        return state.axios.post(`sign-stellar-transaction/${env.stellar.net}`, {xdr, code: authyModalStore.state.code}, {
           headers: {authorization: `Bearer ${state.authIdToken}`}
         });
       })
