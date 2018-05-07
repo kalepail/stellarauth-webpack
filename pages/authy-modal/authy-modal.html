@@ -4,7 +4,7 @@
 
     <div class="qr-actions">
       <img :src="qrCode" class="qr-code" v-if="qrCode">
-      <button class="qr-toggle plain" @click="generateAuthyQr()" v-else :disabled="disabled">Generate QR Code</button>
+      <button class="qr-toggle plain" @click="generateAuthyQr()" v-if="!qrCode && authy.verified" :disabled="disabled">Generate QR Code</button>
     </div>
 
     <form class="code-actions" @submit="submitCode">

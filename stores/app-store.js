@@ -208,8 +208,11 @@ export default new Vuex.Store({
       .finally(() => state.loading.pop());
     },
 
-    spendFunds({state, dispatch, getters}) {
+    spendFunds({state, commit, dispatch, getters}) {
       if (!getters.stellar)
+        return;
+
+      if (!getters.authy)
         return;
 
       if (!authyModalStore.state.code)
@@ -237,6 +240,15 @@ export default new Vuex.Store({
       })
       .then(() => {
         authyModalStore.dispatch('toggleSigning');
+
+        if (!getters.authy.verified) // If authy account is unverifed go check to see if it is now so we can show the qr code option
+          state.lock.checkSession({scope: 'openid profile email'}, (err, authResult) => {
+            if (err)
+              return console.error(err);
+
+            commit('setAuthResult', authResult);
+          });
+
         return dispatch('checkAccountBalance');
       })
       .catch((err) => dispatch('handleWtError', {err, method: 'spendFunds'}))
