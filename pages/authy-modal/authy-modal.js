@@ -69,7 +69,9 @@ export default {
       appStore.dispatch('spendFunds');
     },
 
-    setAuthyAccount() {
+    setAuthyAccount(e) {
+      e.preventDefault();
+
       const dial_code = this.country.dial_code.split(' ');
       const phone = this.phone.getRawValue();
 

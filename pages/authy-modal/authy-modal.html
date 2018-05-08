@@ -41,10 +41,10 @@
       </div>
     </div>
 
-    <div class="email-actions">
+    <form class="email-actions" @submit="setAuthyAccount">
       <input type="text" class="input-email" v-model="email" placeholder="Email Address">
-      <button class="button-add" @click="setAuthyAccount()" :disabled="disabled">Add</button>
-    </div>
+      <button class="button-add" :disabled="disabled">Add</button>
+    </form>
 
     <div v-if="disabled" v-html="loader" class="loader"></div>
   </div>
