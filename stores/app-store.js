@@ -161,7 +161,7 @@ export default new Vuex.Store({
       if (getters.stellar) {
         state.loading.push(1);
 
-        server.loadAccount(getters.stellar.publicKey)
+        server.loadAccount(getters.stellar.childKey)
         .then((account) => commit('setAccount', account))
         .catch((err) => console.error(err))
         .finally(() => state.loading.pop());
@@ -220,14 +220,14 @@ export default new Vuex.Store({
 
       state.loading.push(1);
 
-      server.loadAccount(env.stellar.master_fee)
+      server.loadAccount(getters.stellar.feeKey)
       .then((sourceAccount) => {
         return new StellarSdk.TransactionBuilder(sourceAccount)
         .addOperation(StellarSdk.Operation.payment({
           destination: env.stellar.master_fund,
           asset: StellarSdk.Asset.native(),
           amount: '1',
-          source: getters.stellar.publicKey
+          source: getters.stellar.childKey
         }))
         .build();
       })
