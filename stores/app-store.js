@@ -226,7 +226,7 @@ export default new Vuex.Store({
         .addOperation(StellarSdk.Operation.payment({
           destination: env.stellar.master_fund,
           asset: StellarSdk.Asset.native(),
-          amount: '1',
+          amount: '0.1',
           source: getters.stellar.childKey
         }))
         .build();
