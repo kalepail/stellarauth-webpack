@@ -1,0 +1,51 @@
+<div class="authy-modal">
+  <div class="modal-wrapper post-tfa" v-if="authy">
+    <button @click="$emit('toggleAuthy')" class="modal-close plain" :disabled="disabled"></button>
+
+    <div class="qr-actions">
+      <img :src="qrCode" class="qr-code" v-if="qrCode">
+      <button class="qr-toggle plain" @click="generateAuthyQr()" v-if="!qrCode && authy.verified" :disabled="disabled">Generate QR Code</button>
+    </div>
+
+    <form class="code-actions" @submit="submitCode">
+      <input type="text" class="input-code" pattern="[0-9]*" placeholder="2FA Code" v-model="code">
+      <button class="button-verify" :disabled="disabled || !code">Submit Code</button>
+    </form>
+
+    <div class="sms-actions">
+      <aside class="or">or</aside>
+      <button class="button-sms" @click="sendAuthySMS()" :disabled="disabled">Send SMS</button>
+    </div>
+
+    <div v-if="disabled" v-html="loader" class="loader"></div>
+  </div>
+
+  <div class="modal-wrapper pre-tfa" v-else>
+    <button @click="$emit('toggleAuthy')" class="modal-close" :disabled="disabled"></button>
+
+    <h1>Add 2FA to securely access your account</h1>
+    <h2>Please provide a valid phone number and email address</h2>
+
+    <div class="phone-actions">
+      <select class="select-country-code" v-model="defaultCountryCode" @change="focusPhone()">
+        <option
+          v-for="countryCode in countryCodes"
+          :key="countryCode.code"
+          :value="countryCode.code"
+          :selected="countryCode.code === defaultCountryCode"
+        >{{countryCode.code}} | {{countryCode.name}}</option>
+      </select>
+      <div class="phone-wrapper">
+        <aside class="dial-code" v-if="country">{{country.dial_code | dialCode}}</aside>
+        <input type="text" pattern="[0-9]*" class="input-phone" placeholder="Phone Number">
+      </div>
+    </div>
+
+    <form class="email-actions" @submit="setAuthyAccount">
+      <input type="text" class="input-email" v-model="email" placeholder="Email Address">
+      <button class="button-add" :disabled="disabled">Add</button>
+    </form>
+
+    <div v-if="disabled" v-html="loader" class="loader"></div>
+  </div>
+</div>

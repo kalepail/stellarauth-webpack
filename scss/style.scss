@@ -3,6 +3,7 @@
 @import "../fonts/**/*.css";
 @import "./vamp/*.scss";
 @import "./vendor/*.scss";
+@import "../layouts/**/*.scss";
 @import "../pages/**/*.scss";
 
 * {
@@ -52,13 +53,15 @@ button, input, textarea {
   margin: 0;
 }
 button,
-input[type="text"],
-input[type="tel"],
-input[type="number"],
-textarea {
+input[type=text],
+input[type=tel],
+input[type=number],
+textarea,
+select {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  border-radius: 0;
 }
 button, .button {
   cursor: pointer;

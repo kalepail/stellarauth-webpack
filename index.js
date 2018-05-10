@@ -1,5 +1,7 @@
+import 'es6-promise/auto';
+
 // SASS
 import './scss/style.scss';
 
 // JS
-import './js/app';
+import './layouts/app';

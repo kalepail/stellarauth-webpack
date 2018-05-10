@@ -1,0 +1,226 @@
+.authy-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba($black, 0.5);
+
+  h1 {
+    font-size: 18px;
+  }
+  h2 {
+    color: $gray;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  button:not(.plain):disabled {
+    background-color: $gray;
+    pointer-events: none;
+  }
+  button.plain:disabled {
+    color: $gray;
+    pointer-events: none;
+  }
+  .modal-close:disabled {
+    display: none;
+  }
+
+  .loader {
+    align-self: center;
+    margin-top: 10px;
+    color: $gray;
+  }
+}
+.modal-wrapper {
+  display: flex;
+  flex-direction: column;
+  background-color: $white;
+  border-radius: $radius;
+  box-shadow: 0 2px 18px rgba($black, 0.2);
+  width: 100%;
+  position: relative;
+
+  &.pre-tfa {
+    max-width: 500px;
+    padding: 20px;
+  }
+  &.post-tfa {
+    max-width: 320px;
+    background-color: $ltgray;
+    padding-bottom: 20px;
+  }
+
+  @include breakpoint(530px) {
+    max-width: 100% !important;
+    border-radius: 0;
+  }
+}
+.modal-close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translate(0, -100%);
+  color: $white;
+  text-transform: uppercase;
+  font-size: 14px;
+  height: 40px;
+
+  &:after {
+    content: 'Close';
+  }
+
+  @include breakpoint(530px) {
+    background-color: $white;
+    top: -10px;
+    right: 10px;
+    color: $gray;
+    font-size: 24px;
+    height: 35px;
+    width: 35px;
+    border-radius: 50%;
+
+    &:after {
+      content: '\0000D7';
+      position: relative;
+      top: -2px;
+    }
+  }
+}
+.phone-actions,
+.email-actions,
+.code-actions,
+.sms-actions {
+  display: flex;
+  align-items: center;
+
+  select,
+  input[type=text] {
+    border: 1px solid $gray;
+    padding: 0 10px;
+    height: 35px;
+    border-radius: $radius;
+
+    &:focus {
+      border-color: $blue;
+    }
+  }
+}
+
+.qr-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: $white;
+  overflow: hidden;
+  border-radius: $radius $radius 0 0;
+
+  .qr-code {
+    align-self: center;
+    max-width: 320px;
+    width: 100%;
+  }
+  .qr-toggle {
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 10px 0;
+  }
+
+  @include breakpoint(530px) {
+    border-radius: 0;
+  }
+}
+.code-actions {
+  padding: 20px 20px 10px;
+
+  .input-code {
+    width: 100%;
+  }
+  .button-verify {
+    background-color: $blue;
+    color: $white;
+    padding: 0 20px;
+    height: 35px;
+    border-radius: $radius;
+    flex-shrink: 0;
+    margin-left: 10px;
+  }
+}
+.sms-actions {
+  padding: 0 20px;
+
+  .or {
+    margin-right: 10px;
+    font-size: 14px;
+  }
+  .button-sms {
+    width: 100%;
+    background-color: $black;
+    color: $white;
+    height: 35px;
+    border-radius: $radius;
+    align-self: center;
+  }
+}
+
+.phone-actions {
+
+  .select-country-code,
+  .phone-wrapper {
+    margin-bottom: 10px;
+  }
+  .select-country-code {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .phone-wrapper {
+    margin-bottom: 10px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .dial-code {
+    color: $gray;
+    text-align: right;
+    margin-right: 10px;
+  }
+  .input-phone {
+    width: 100%;
+  }
+
+  @include breakpoint(530px) {
+    flex-wrap: wrap;
+
+    .phone-wrapper {
+      margin-left: 0;
+    }
+  }
+}
+.email-actions {
+  justify-content: space-between;
+
+  .input-email {
+    width: 100%;
+  }
+  .button-add {
+    background-color: $blue;
+    color: $white;
+    height: 35px;
+    border-radius: $radius;
+    width: 100px;
+    margin-left: 10px;
+    flex-shrink: 0;
+
+    @include breakpoint(530px) {
+      width: 80px;
+    }
+  }
+}
