@@ -5,6 +5,8 @@ import env from '../dev.json';
 import authyModalStore from './authy-modal-store';
 import axios from 'axios';
 import StellarSdk from 'stellar-sdk';
+import { decode } from 'base64-arraybuffer';
+import ab2str from 'arraybuffer-to-string';
 
 Vue.use(Vuex);
 
@@ -220,7 +222,9 @@ export default new Vuex.Store({
 
       state.loading.push(1);
 
-      server.loadAccount(getters.stellar.feeKey)
+      const feeKey = ab2str(decode(state.account.data_attr.feeKey));
+
+      server.loadAccount(feeKey)
       .then((sourceAccount) => {
         return new StellarSdk.TransactionBuilder(sourceAccount)
         .addOperation(StellarSdk.Operation.payment({
