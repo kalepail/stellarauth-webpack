@@ -99,7 +99,7 @@ export default new Vuex.Store({
 
       appStore.state.loading.push(1);
 
-      return appStore.state.axios.post('lookup-phone-number', {
+      return appStore.state.axios.post('utils/lookup', {
         number: appStore.state.authIdTokenPayload[env.auth0.scope].phone
       }, {
         headers: {authorization: `Bearer ${appStore.state.authIdToken}`}

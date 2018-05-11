@@ -88,7 +88,7 @@ export default {
 
       this.loading.push(1);
 
-      this.axios.post('set-authy-account', {
+      this.axios.post('authy/set-account', {
         phone: {
           number: phone,
           code: this.country.code,
@@ -114,7 +114,7 @@ export default {
     generateAuthyQr() {
       this.loading.push(1);
 
-      this.axios.post('generate-authy-qr', null, {
+      this.axios.post('authy/generate-qr', null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data: {qr_code}}) => authyModalStore.commit('setQrCode', qr_code))
@@ -125,7 +125,7 @@ export default {
     sendAuthySMS() {
       this.loading.push(1);
 
-      this.axios.post('send-authy-sms', null, {
+      this.axios.post('authy/send-sms', null, {
         headers: {authorization: `Bearer ${this.authIdToken}`}
       })
       .then(({data}) => console.log(data))

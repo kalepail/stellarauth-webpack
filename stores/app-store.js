@@ -173,7 +173,7 @@ export default new Vuex.Store({
     setAccount({state, commit, dispatch}) {
       state.loading.push(1);
 
-      state.axios.post('set-stellar-account', null, {
+      state.axios.post('stellar/set-account', null, {
         headers: {authorization: `Bearer ${state.authIdToken}`}
       })
       .then(() => { // Stellar account should be available now, go get and set it
@@ -191,7 +191,7 @@ export default new Vuex.Store({
     createAccount({state, dispatch}) {
       state.loading.push(1);
 
-      state.axios.post(`create-stellar-account/${env.stellar.net}`, null, {
+      state.axios.post(`stellar/create-account/${env.stellar.net}`, null, {
         headers: {authorization: `Bearer ${state.authIdToken}`}
       })
       .then(() => dispatch('checkAccountBalance'))
@@ -202,7 +202,7 @@ export default new Vuex.Store({
     fundAccount({state, dispatch}) {
       state.loading.push(1);
 
-      state.axios.post(`fund-stellar-account/${env.stellar.net}`, null, {
+      state.axios.post(`stellar/fund-account/${env.stellar.net}`, null, {
         headers: {authorization: `Bearer ${state.authIdToken}`}
       })
       .then(() => dispatch('checkAccountBalance'))
@@ -238,7 +238,7 @@ export default new Vuex.Store({
       .then((transaction) => {
         const xdr = transaction.toEnvelope().toXDR().toString('base64');
 
-        return state.axios.post(`sign-stellar-transaction/${env.stellar.net}`, {xdr, code: authyModalStore.state.code}, {
+        return state.axios.post(`stellar/sign-transaction/${env.stellar.net}`, {xdr, code: authyModalStore.state.code}, {
           headers: {authorization: `Bearer ${state.authIdToken}`}
         });
       })
