@@ -7,7 +7,7 @@
       <button class="qr-toggle plain" @click="generateAuthyQr()" v-if="!qrCode && authy.verified" :disabled="disabled">Generate QR Code</button>
     </div>
 
-    <form class="code-actions" @submit="submitCode">
+    <form class="code-actions" @submit="submitCode" novalidate>
       <input type="text" class="input-code" pattern="[0-9]*" placeholder="2FA Code" v-model="code">
       <button class="button-verify" :disabled="disabled || !code">Submit Code</button>
     </form>
@@ -20,8 +20,8 @@
     <div v-if="disabled" v-html="loader" class="loader"></div>
   </div>
 
-  <div class="modal-wrapper pre-tfa" v-else>
-    <button @click="$emit('toggleAuthy')" class="modal-close" :disabled="disabled"></button>
+  <form class="modal-wrapper pre-tfa" @submit="setAuthyAccount" novalidate v-else>
+    <button type="button" @click="$emit('toggleAuthy')" class="modal-close" :disabled="disabled"></button>
 
     <h1>Add 2FA to securely access your account</h1>
     <h2>Please provide a valid phone number and email address</h2>
@@ -41,11 +41,11 @@
       </div>
     </div>
 
-    <form class="email-actions" @submit="setAuthyAccount">
+    <div class="email-actions">
       <input type="text" class="input-email" v-model="email" placeholder="Email Address">
-      <button class="button-add" :disabled="disabled">Add</button>
-    </form>
+      <button type="submit" class="button-add" :disabled="disabled">Add</button>
+    </div>
 
     <div v-if="disabled" v-html="loader" class="loader"></div>
-  </div>
+  </form>
 </div>
