@@ -1,3 +1,3 @@
-# StellarAuth
+# StellarAuth Webpack
 
 TODO
