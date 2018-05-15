@@ -1,7 +1,6 @@
 import Vue from 'vue/dist/vue.esm';
 import Vuex from 'vuex';
 import countryCodes from '../data/country-codes.json';
-import axios from 'axios';
 import _ from 'lodash';
 import Cleave from 'cleave.js';
 import 'cleave.js/dist/addons/cleave-phone.i18n.js';
