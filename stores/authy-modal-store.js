@@ -114,7 +114,7 @@ export default new Vuex.Store({
     getDefaultCountryCode({commit}) {
       appStore.state.loading.push(1);
 
-      return axios.get('https://api.ipdata.co')
+      return appStore.state.axios.get('https://api.ipdata.co')
       .then(({data}) => commit('setDefaultCountryCode', data.country_code))
       .catch((err) => console.error(err))
       .finally(() => appStore.state.loading.pop());
