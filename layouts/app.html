@@ -13,8 +13,8 @@
     <p v-if="render === 'normal'">{{account.balances[0].balance}} XLM</p>
   </div>
 
-  <div class="key" v-if="render === 'fund'">{{stellar.childKey}}</div>
-  <a class="key" :href="'https://stellar.expert/explorer/testnet/account/'+ stellar.childKey" target="_blank" v-if="render === 'normal'">{{stellar.childKey}}</a>
+  <div class="key" v-if="render === 'fund'">{{stellarChildKey}}</div>
+  <a class="key" :href="'https://stellar.expert/explorer/testnet/account/'+ stellarChildKey" target="_blank" v-if="render === 'normal'">{{stellarChildKey}}</a>
 
   <authy-modal
     v-show="signing"

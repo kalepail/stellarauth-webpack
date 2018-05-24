@@ -18,6 +18,7 @@ export default new Vue({
       lock: () => appStore.state.lock,
       account: () => appStore.state.account,
       authAccessToken: () => appStore.state.authAccessToken,
+      stellarChildKey: () => appStore.state.stellarChildKey,
       loading: () => appStore.state.loading,
       loader: () => appStore.state.loader,
       interval: () => appStore.state.interval,
@@ -28,7 +29,6 @@ export default new Vue({
     // Getters
       // appStore
       render: () => appStore.getters.render,
-      stellar: () => appStore.getters.stellar,
       disabled: () => appStore.getters.disabled,
 
       // authyModalStore
@@ -88,6 +88,7 @@ export default new Vue({
       sessionStorage.removeItem('authIdTokenPayload');
       sessionStorage.removeItem('authIdToken');
       sessionStorage.removeItem('pendingMethod');
+      sessionStorage.removeItem('stellarChildKey');
       this.lock.logout({returnTo: location.origin});
     }
   }

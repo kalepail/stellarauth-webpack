@@ -6,6 +6,7 @@ import Cleave from 'cleave.js';
 import 'cleave.js/dist/addons/cleave-phone.i18n.js';
 import env from '../dev.json';
 import appStore from './app-store';
+import axios from 'axios';
 
 Vue.use(Vuex);
 
@@ -114,7 +115,7 @@ export default new Vuex.Store({
     getDefaultCountryCode({commit}) {
       appStore.state.loading.push(1);
 
-      return appStore.state.axios.get('https://api.ipdata.co')
+      return axios.get('https://api.ipdata.co')
       .then(({data}) => commit('setDefaultCountryCode', data.country_code))
       .catch((err) => console.error(err))
       .finally(() => appStore.state.loading.pop());
