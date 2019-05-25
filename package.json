@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server",
-    "deploy": "npm run prod && surge ./dist https://stellarauth.com",
+    "deploy": "npm run prod && surge ./dist https://create.stellarauth.com",
     "prod": "npm run prepare && webpack --env=production",
     "prepare": "npm run lint && npm run trash",
     "lint": "./node_modules/.bin/eslint ./js",
