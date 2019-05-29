@@ -26,7 +26,10 @@ export default new Vuex.Store({
   state: {
     axios: axios.create({
       baseURL: env.wt,
-      headers: {'Content-Type': 'application/json'}
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Sa-Token': env.auth0.token
+      }
     }),
     lock: null,
     account: null,
@@ -34,24 +37,22 @@ export default new Vuex.Store({
     authAccessToken: sessionStorage.getItem('authAccessToken'),
     authIdToken: sessionStorage.getItem('authIdToken'),
     pendingMethod: sessionStorage.getItem('pendingMethod'),
+    stellarChildKey: sessionStorage.getItem('stellarChildKey'),
 
     loading: [],
     loader: null,
-    interval: null,
+    interval: null
   },
   getters: {
-    render(state, getters) {
+    render(state) {
       if (state.account)
         return 'normal';
 
-      else if (getters.stellar)
+      else if (state.stellarChildKey)
         return 'fund';
 
       else
         return 'login';
-    },
-    stellar(state) {
-      return state.authIdTokenPayload ? state.authIdTokenPayload[env.auth0.scope].stellar : null;
     },
     authy(state) {
       return state.authIdTokenPayload ? state.authIdTokenPayload[env.auth0.scope].authy : null;
@@ -70,6 +71,10 @@ export default new Vuex.Store({
     setAuthIdTokenPayload(state, value) {
       state.authIdTokenPayload = value;
       sessionStorage.setItem('authIdTokenPayload', JSON.stringify(value));
+    },
+    setStellarChildKey(state, value) {
+      state.stellarChildKey = value;
+      sessionStorage.setItem('stellarChildKey', value);
     },
     setAuthResult(state, value) {
       state.authIdToken = value.idToken;
@@ -131,7 +136,7 @@ export default new Vuex.Store({
         state.lock.show();
     },
 
-    lockAuthenticated({state, dispatch, getters, commit}, authResult) {
+    lockAuthenticated({state, dispatch, commit}, authResult) {
       if ( // Accounts mismatched
         state.authIdTokenPayload &&
         state.authIdTokenPayload.sub !== authResult.idTokenPayload.sub
@@ -152,18 +157,18 @@ export default new Vuex.Store({
         commit('setPendingMethod', null);
       }
 
-      else if (!getters.stellar)
+      else if (!state.stellarChildKey)
         dispatch('setAccount');
 
       else
         dispatch('checkAccountBalance');
     },
 
-    checkAccountBalance({state, commit, getters}) {
-      if (getters.stellar) {
+    checkAccountBalance({state, commit}) {
+      if (state.stellarChildKey) {
         state.loading.push(1);
 
-        server.loadAccount(getters.stellar.childKey)
+        server.loadAccount(state.stellarChildKey)
         .then((account) => commit('setAccount', account))
         .catch((err) => console.error(err))
         .finally(() => state.loading.pop());
@@ -176,13 +181,9 @@ export default new Vuex.Store({
       state.axios.post('stellar/set-account', null, {
         headers: {authorization: `Bearer ${state.authIdToken}`}
       })
-      .then(() => { // Stellar account should be available now, go get and set it
-        state.lock.checkSession({scope: 'openid profile email'}, (err, authResult) => {
-          if (err)
-            return console.error(err);
-
-          commit('setAuthResult', authResult);
-        });
+      .then(({data: {childKey}}) => {
+        commit('setStellarChildKey', childKey);
+        dispatch('checkAccountBalance');
       })
       .catch((err) => dispatch('handleWtError', {err, method: 'setAccount'}))
       .finally(() => state.loading.pop());
@@ -211,7 +212,7 @@ export default new Vuex.Store({
     },
 
     spendFunds({state, commit, dispatch, getters}) {
-      if (!getters.stellar)
+      if (!state.stellarChildKey)
         return;
 
       if (!getters.authy)
@@ -231,7 +232,7 @@ export default new Vuex.Store({
           destination: env.stellar.master_fund,
           asset: StellarSdk.Asset.native(),
           amount: '0.1',
-          source: getters.stellar.childKey
+          source: state.stellarChildKey
         }))
         .build();
       })
