@@ -49,7 +49,7 @@
     "email-validator": "^2.0.3",
     "es6-promise": "^4.2.4",
     "isemail": "^3.1.2",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.13",
     "query-string": "^6.1.0",
     "stellar-sdk": "^0.8.0",
     "vue": "^2.5.16",
