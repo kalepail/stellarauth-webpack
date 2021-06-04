@@ -42,7 +42,7 @@
   "dependencies": {
     "arraybuffer-to-string": "^1.0.2",
     "auth0-js": "^9.5.1",
-    "auth0-lock": "^11.6.1",
+    "auth0-lock": "^11.30.1",
     "axios": "^0.18.0",
     "base64-arraybuffer": "^0.1.5",
     "cleave.js": "^1.3.3",
